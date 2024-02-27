@@ -1,0 +1,9 @@
+/.idea/
+/tests/
+
+poetry.lock
+config.toml
+
+*/__pycache__/
+.cache
+.ruff_cache

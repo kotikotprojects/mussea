@@ -1,0 +1,5 @@
+[telegram]
+bot_token = ''
+
+[log]
+log_tiktoks = true
