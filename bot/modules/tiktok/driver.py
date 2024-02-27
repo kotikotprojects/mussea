@@ -3,9 +3,9 @@ from attrs import define
 from .engine import TikTokEngine
 
 AWEME_APIS = (
+    "https://api31-normal-useast2a.tiktokv.com/aweme/v1/aweme/detail/",
     "https://api19-core-c-useast1a.musical.ly/aweme/v1/feed/",
     "https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/",
-    "https://api31-normal-useast2a.tiktokv.com/aweme/v1/aweme/detail/",
 )
 
 STATIC_PARAMS = {
