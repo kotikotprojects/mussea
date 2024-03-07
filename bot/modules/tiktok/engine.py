@@ -1,5 +1,6 @@
 import aiohttp
 from attrs import define
+from bot.utils.config import config
 
 USER_AGENT = (
     "com.ss.android.ugc.33.3.4/330304 (Linux; U; Android 13; en_US; Pixel 7; "
@@ -51,6 +52,10 @@ class TikTokEngine:
                 url,
                 params=(params or {}),
             ) as r:
+                if r.status != 200:
+                    raise Exception
+                if config.log.log_endpoints:
+                    print(r.url)
                 return await r.json()
         except AttributeError:
             await self.restart_session()
