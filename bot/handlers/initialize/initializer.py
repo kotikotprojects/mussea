@@ -11,6 +11,6 @@ async def startup(bot: Bot):
 
 @router.shutdown()
 async def shutdown():
-    from bot.modules.tiktok import tiktok
+    from bot.modules.providers.tiktokapi import tiktokapi
 
-    await tiktok.engine.close_session()
+    await tiktokapi.engine.close_session()

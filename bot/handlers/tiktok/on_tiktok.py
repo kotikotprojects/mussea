@@ -1,9 +1,11 @@
-from aiogram import Router, types, exceptions
+from aiogram import Router, exceptions, types
+from rich import print
 
 from bot.filters import TikTokUrlFilter
-from bot.modules.tiktok import Photos, Video, tiktok
+from bot.modules.providers.common.content import BasePhotos, BaseVideo
+from bot.modules.providers.tiktokapi import tiktokapi
+from bot.modules.providers.contentstudio import contentstudio
 from bot.utils.config import config
-from rich import print
 
 router = Router()
 
@@ -19,12 +21,13 @@ async def on_tiktok(message: types.Message):
                 message.from_user.username else message.from_user.id}] {url}"""
             )
 
-        content = await tiktok.content.from_url(url)
+        content = await contentstudio.content.from_url(url)
         await init_msg.delete()
 
-        if isinstance(content, Video):
+        if isinstance(content, BaseVideo):
             try:
                 await message.reply_video(content.url)
+
             except exceptions.TelegramBadRequest:
                 err_msg = await message.reply(
                     "😨 Telegram cannot download provided video. "
@@ -40,12 +43,13 @@ async def on_tiktok(message: types.Message):
                         )
                         if file
                         else message.reply("💔 File is probably too big for us")
-                    )(file=await tiktok.engine.read_data(content.url))
+                    )(file=await tiktokapi.engine.read_data(content.url))
                     await err_msg.delete()
+
                 except exceptions.TelegramBadRequest:
                     await err_msg.edit_text("💔 Telegram didn't accept even our file")
 
-        elif isinstance(content, Photos):
+        elif isinstance(content, BasePhotos):
             chunk_start = 0
             while chunk_start < len(content.urls):
                 chunk_end = min(chunk_start + 10, len(content.urls))

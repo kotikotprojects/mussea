@@ -4,6 +4,7 @@ from typing import Optional
 
 from attrs import define
 
+from ..common.content import BasePhotos, BaseVideo
 from .driver import TikTokDriver
 
 REGEX_VIDEO_ID = (
@@ -19,9 +20,7 @@ REGEX_TIKTOK_URL = (
 
 
 @define
-class Video:
-    url: str
-
+class TikTokVideo(BaseVideo):
     @classmethod
     async def from_aweme_json(cls, data: dict, driver: TikTokDriver):
         urls = data["video"]["play_addr"]["url_list"]
@@ -33,12 +32,7 @@ class Video:
 
 
 @define
-class Photos:
-    urls: list[str]
-    audio_url: Optional[str]
-    audio_author: Optional[str]
-    audio_title: Optional[str]
-
+class TikTokPhotos(BasePhotos):
     @classmethod
     async def from_aweme_json(cls, data: dict, driver: TikTokDriver):
         ready_urls = list()
@@ -62,6 +56,7 @@ class Photos:
                     )
                 else:
                     raise TypeError
+
         except (TypeError, AttributeError, IndexError):
             return cls(
                 urls=ready_urls, audio_url=None, audio_title=None, audio_author=None
@@ -72,7 +67,7 @@ class Photos:
 class Content:
     driver: TikTokDriver
 
-    async def from_id(self, aweme_id: str) -> Optional[Video | Photos]:
+    async def from_id(self, aweme_id: str) -> Optional[TikTokVideo | TikTokPhotos]:
         r = await self.driver.get_aweme(aweme_id)
 
         if r is None:
@@ -80,23 +75,23 @@ class Content:
 
         try:
             if r["content_type"] == "video":
-                return await Video.from_aweme_json(r, self.driver)
+                return await TikTokVideo.from_aweme_json(r, self.driver)
             elif "photo" in r["content_type"]:
-                return await Photos.from_aweme_json(r, self.driver)
+                return await TikTokPhotos.from_aweme_json(r, self.driver)
 
             else:
                 return None
 
         except KeyError:
             if r.get("video"):
-                return await Video.from_aweme_json(r, self.driver)
+                return await TikTokVideo.from_aweme_json(r, self.driver)
             elif r.get("image_post_info"):
-                return await Photos.from_aweme_json(r, self.driver)
+                return await TikTokPhotos.from_aweme_json(r, self.driver)
 
             else:
                 return None
 
-    async def from_url(self, url: str) -> Optional[Video | Photos]:
+    async def from_url(self, url: str) -> Optional[TikTokVideo | TikTokPhotos]:
         url_ = re.search(REGEX_TIKTOK_URL, url, re.IGNORECASE)
         if not url_:
             url_ = await self.driver.engine.real_url(url)
