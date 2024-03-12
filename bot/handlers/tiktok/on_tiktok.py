@@ -1,10 +1,11 @@
-from aiogram import Router, exceptions, types
+from aiogram import Router, types
 from rich import print
+from rich.traceback import Traceback
 
 from bot.filters import TikTokUrlFilter
-from bot.modules.providers.common.content import BasePhotos, BaseVideo
-from bot.modules.providers.tiktokapi import tiktokapi
-from bot.modules.providers.contentstudio import contentstudio
+from bot.modules.custom_sender import custom_sender
+from bot.modules.cycle.cycle import LinkCycle
+from bot.modules.cycle.estimator import process_situation
 from bot.utils.config import config
 
 router = Router()
@@ -13,63 +14,57 @@ router = Router()
 @router.message(TikTokUrlFilter())
 async def on_tiktok(message: types.Message):
     for url in TikTokUrlFilter.get_tiktoks(message):
-        init_msg = await message.reply("🌊 Downloading...")
-
         if config.log.log_tiktoks:
             print(  # noqa
                 f"""\[{f"@{message.from_user.username}" if 
                 message.from_user.username else message.from_user.id}] {url}"""
             )
+        init_msg = await message.reply("🌊 Downloading...")
+        cycle = LinkCycle(url).set_estimate()
+        while not cycle.finished:
+            cycle = await process_situation(cycle)
 
-        content = await contentstudio.content.from_url(url)
-        await init_msg.delete()
+            if cycle.end_error:
+                await message.reply(
+                    text="💔 Cannot download your video. None of our providers could process this request. "
+                         "Maybe the video doesn't exist or TikTok servers are shut down?"
+                )
+                cycle.set_finished()
 
-        if isinstance(content, BaseVideo):
+            if not cycle.job.send:
+                continue
+
             try:
-                await message.reply_video(content.url)
-
-            except exceptions.TelegramBadRequest:
-                err_msg = await message.reply(
-                    "😨 Telegram cannot download provided video. "
-                    "But don't worry! We will fix everything for you in a moment."
-                )
-                try:
-                    await (
-                        lambda file: message.reply_video(
-                            types.BufferedInputFile(
-                                filename="mussea.mp4",
-                                file=file,
-                            )
+                if cycle.video:
+                    if not (
+                        await custom_sender.methods.send_video(
+                            url=cycle.video.url,
+                            chat_id=message.chat.id,
+                            reply_to_message_id=message.message_id,
                         )
-                        if file
-                        else message.reply("💔 File is probably too big for us")
-                    )(file=await tiktokapi.engine.read_data(content.url))
-                    await err_msg.delete()
+                    ).get("ok"):
+                        await message.reply_video(
+                            video=types.URLInputFile(url=cycle.video.url)
+                        )
+                if cycle.photos:
+                    for chunk in cycle.photos.urls_chunked:
+                        if len(chunk) > 1:
+                            await message.reply_media_group(
+                                [types.InputMediaPhoto(media=url) for url in chunk]
+                            )
+                        else:
+                            await message.reply_photo(chunk[0])
+                if cycle.audio:
+                    await message.reply_audio(audio=cycle.audio)
 
-                except exceptions.TelegramBadRequest:
-                    await err_msg.edit_text("💔 Telegram didn't accept even our file")
+                cycle.set_finished()
 
-        elif isinstance(content, BasePhotos):
-            chunk_start = 0
-            while chunk_start < len(content.urls):
-                chunk_end = min(chunk_start + 10, len(content.urls))
-                if chunk_end - chunk_start == 1 and len(content.urls) > 2:
-                    chunk_end -= 1
+            except Exception as e:
+                assert e
+                if config.log.log_cycle_errors:
+                    print("ERROR IN CYCLE")
+                    print(Traceback(show_locals=True))
+                    print("END ERROR IN CYCLE")
+                cycle.set_estimate()
 
-                current_chunk = content.urls[chunk_start:chunk_end]
-
-                if len(current_chunk) > 1:
-                    await message.reply_media_group(
-                        [types.InputMediaPhoto(media=url) for url in current_chunk]
-                    )
-                else:
-                    await message.reply_photo(current_chunk[0])
-
-                chunk_start = chunk_end
-
-            if content.audio_url:
-                await message.reply_audio(
-                    audio=content.audio_url,
-                    title=content.audio_title,
-                    performer=content.audio_author,
-                )
+        await init_msg.delete()

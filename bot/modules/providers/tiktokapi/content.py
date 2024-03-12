@@ -48,19 +48,12 @@ class TikTokPhotos(BasePhotos):
             added_songs = data["added_sound_music_info"]["play_url"]["url_list"]
             for song in added_songs:
                 if await driver.engine.check_exists(song):
-                    return cls(
-                        urls=ready_urls,
-                        audio_url=song,
-                        audio_title=data["added_sound_music_info"]["title"],
-                        audio_author=data["added_sound_music_info"]["author"],
-                    )
+                    return cls(urls=ready_urls, audio_url=song)
                 else:
                     raise TypeError
 
         except (TypeError, AttributeError, IndexError):
-            return cls(
-                urls=ready_urls, audio_url=None, audio_title=None, audio_author=None
-            )
+            return cls(urls=ready_urls, audio_url=None)
 
 
 @define
@@ -83,10 +76,10 @@ class Content:
                 return None
 
         except KeyError:
-            if r.get("video"):
-                return await TikTokVideo.from_aweme_json(r, self.driver)
-            elif r.get("image_post_info"):
+            if r.get("image_post_info"):
                 return await TikTokPhotos.from_aweme_json(r, self.driver)
+            elif r.get("video"):
+                return await TikTokVideo.from_aweme_json(r, self.driver)
 
             else:
                 return None

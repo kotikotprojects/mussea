@@ -1,11 +1,10 @@
+import orjson
 from attrs import define
-
-from ..common.engine import CommonEngine
-from ..common.exceptions import EndpointNotFound
 
 from bot.utils.config import config
 
-import orjson
+from ..common.engine import CommonEngine
+from ..common.exceptions import EndpointNotFound
 
 
 @define
@@ -13,9 +12,7 @@ class ContentStudioEngine(CommonEngine):
     async def get(self, url: str, json: dict = None):
         try:
             async with self.session.post(
-                url,
-                json=(json or {}),
-                headers={"Content-Type": "application/json"}
+                url, json=(json or {}), headers={"Content-Type": "application/json"}
             ) as r:
                 if r.status != 200:
                     raise EndpointNotFound(r.url)

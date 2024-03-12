@@ -2,5 +2,6 @@
 bot_token = ''
 
 [log]
+log_cycle_errors = true
 log_tiktoks = true
 log_endpoints = false

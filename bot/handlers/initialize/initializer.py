@@ -11,6 +11,10 @@ async def startup(bot: Bot):
 
 @router.shutdown()
 async def shutdown():
+    from bot.modules.custom_sender import custom_sender
+    from bot.modules.providers.contentstudio import contentstudio
     from bot.modules.providers.tiktokapi import tiktokapi
 
     await tiktokapi.engine.close_session()
+    await contentstudio.engine.close_session()
+    await custom_sender.engine.close_session()
