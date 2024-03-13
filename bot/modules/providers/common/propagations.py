@@ -4,7 +4,7 @@ from typing import Optional
 
 @dataclass
 class PropagatePhotosNeeded:
-    audio: str
+    audio: str = None
     id: Optional[str] = None
     needs = "photos"
 

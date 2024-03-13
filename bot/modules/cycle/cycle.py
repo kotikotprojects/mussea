@@ -40,7 +40,7 @@ class LinkCycle:
 
     job: Jobs = field(default_factory=Jobs)
     needs: PropagatePhotosNeeded | PropagateVideoNeeded | PropagateEverythingNeeded | PropagateAudioNeeded = (
-        None
+        field(default_factory=PropagateEverythingNeeded)
     )
 
     video: BaseVideo = None

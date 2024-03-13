@@ -49,11 +49,11 @@ def __process_estimated(cycle: LinkCycle):
 
 async def process_situation(cycle: LinkCycle) -> LinkCycle:
     try:
-        if cycle.job.estimate and not cycle.needs:
+        if cycle.job.estimate and not cycle.needs.needs:
             cycle.estimated = await cycle.providers.get_next().from_url(cycle.url)
             return __process_estimated(cycle)
 
-        elif cycle.job.estimate and cycle.needs:
+        elif cycle.job.estimate and cycle.needs.needs:
             provider = cycle.providers.get_for_type(cycle.needs.needs)
             cycle.estimated = await (
                 provider.from_preferred(getattr(cycle, provider.wants))

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from .common.providers import Provider
 from .contentstudio import contentstudio
 from .tiktokapi import tiktokapi
+from .estimator import estimator
 
 
 class NoProvidersLeft(Exception):
@@ -11,7 +12,7 @@ class NoProvidersLeft(Exception):
 
 @dataclass
 class Providers:
-    __providers = [contentstudio, tiktokapi]
+    __providers = [estimator, contentstudio, tiktokapi]
     __current = -1
 
     def get_next(self) -> Provider:
@@ -22,9 +23,8 @@ class Providers:
             raise NoProvidersLeft()
 
     def get_for_type(self, supports):
-        if supports is None:
-            return self.get_next()
         try:
+            self.__current += 1
             current = self.__providers[self.__current]
         except IndexError:
             raise NoProvidersLeft()

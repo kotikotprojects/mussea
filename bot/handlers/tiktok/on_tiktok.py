@@ -1,3 +1,5 @@
+import time
+
 from aiogram import Router, types
 from rich import print
 from rich.traceback import Traceback
@@ -5,7 +7,7 @@ from rich.traceback import Traceback
 from bot.filters import TikTokUrlFilter
 from bot.modules.custom_sender import custom_sender
 from bot.modules.cycle.cycle import LinkCycle
-from bot.modules.cycle.estimator import process_situation
+from bot.modules.cycle.processor import process_situation
 from bot.utils.config import config
 
 router = Router()
@@ -46,6 +48,7 @@ async def on_tiktok(message: types.Message):
                         await message.reply_video(
                             video=types.URLInputFile(url=cycle.video.url)
                         )
+
                 if cycle.photos:
                     for chunk in cycle.photos.urls_chunked:
                         if len(chunk) > 1:
