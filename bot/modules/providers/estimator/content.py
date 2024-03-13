@@ -1,10 +1,13 @@
+import re
 from typing import Optional
 
 from attrs import define
 
-from ..common.propagations import PropagateVideoNeeded, PropagatePhotosNeeded, PropagateEverythingNeeded
-
-import re
+from ..common.propagations import (
+    PropagateEverythingNeeded,
+    PropagatePhotosNeeded,
+    PropagateVideoNeeded,
+)
 
 REGEX_VIDEO_ID = (
     r"(?:https:\/\/(?:www\.)*tiktok\.com\/@[^?\/]+\/video\/)(?:([0-9]+)?(?:\?.+)?$|$)"
@@ -21,26 +24,20 @@ REGEX_TIKTOK_URL = (
 @define
 class Content:
     @staticmethod
-    async def from_id(
-        video_id: str
-    ) -> Optional[PropagateEverythingNeeded]:
+    async def from_id(video_id: str) -> Optional[PropagateEverythingNeeded]:
         return PropagateEverythingNeeded(video_id)
 
     @staticmethod
     async def from_url(
-        url: str
-    ) -> Optional[PropagateVideoNeeded | PropagatePhotosNeeded | PropagateEverythingNeeded]:
+        url: str,
+    ) -> Optional[
+        PropagateVideoNeeded | PropagatePhotosNeeded | PropagateEverythingNeeded
+    ]:
         if g := re.search(REGEX_VIDEO_ID, url, re.IGNORECASE):
-            return PropagateVideoNeeded(
-                id=g.groups()[0]
-            )
+            return PropagateVideoNeeded(id=g.groups()[0])
         elif g := re.search(REGEX_PHOTO_ID, url, re.IGNORECASE):
-            return PropagatePhotosNeeded(
-                id=g.groups()[0]
-            )
+            return PropagatePhotosNeeded(id=g.groups()[0])
         elif g := re.search(REGEX_TIKTOK_URL, url, re.IGNORECASE):
-            return PropagateEverythingNeeded(
-                id=g.groups()[1].split("/")[-1]
-            )
+            return PropagateEverythingNeeded(id=g.groups()[1].split("/")[-1])
         else:
             return PropagateEverythingNeeded()

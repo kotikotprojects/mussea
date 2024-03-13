@@ -1,5 +1,3 @@
-import time
-
 from aiogram import Router, types
 from rich import print
 from rich.traceback import Traceback
@@ -29,7 +27,7 @@ async def on_tiktok(message: types.Message):
             if cycle.end_error:
                 await message.reply(
                     text="💔 Cannot download your video. None of our providers could process this request. "
-                         "Maybe the video doesn't exist or TikTok servers are shut down?"
+                    "Maybe the video doesn't exist or TikTok servers are shut down?"
                 )
                 cycle.set_finished()
 

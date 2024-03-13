@@ -23,10 +23,10 @@ class Estimator(Provider):
     async def from_url(
         self, url: str
     ) -> (
-            PropagateEverythingNeeded
-            | PropagateAudioNeeded
-            | PropagateVideoNeeded
-            | PropagatePhotosNeeded
+        PropagateEverythingNeeded
+        | PropagateAudioNeeded
+        | PropagateVideoNeeded
+        | PropagatePhotosNeeded
     ):
         return await self.content.from_url(url)
 
@@ -34,10 +34,10 @@ class Estimator(Provider):
     async def from_id(
         self, url: str
     ) -> (
-            PropagateEverythingNeeded
-            | PropagateAudioNeeded
-            | PropagateVideoNeeded
-            | PropagatePhotosNeeded
+        PropagateEverythingNeeded
+        | PropagateAudioNeeded
+        | PropagateVideoNeeded
+        | PropagatePhotosNeeded
     ):
         return await self.content.from_id(url)
 
@@ -45,9 +45,9 @@ class Estimator(Provider):
     async def from_preferred(
         self, preferred: str
     ) -> (
-            PropagateEverythingNeeded
-            | PropagateAudioNeeded
-            | PropagateVideoNeeded
-            | PropagatePhotosNeeded
+        PropagateEverythingNeeded
+        | PropagateAudioNeeded
+        | PropagateVideoNeeded
+        | PropagatePhotosNeeded
     ):
         return await self.from_url(preferred)

@@ -39,8 +39,8 @@ class LinkCycle:
     estimated = None
 
     job: Jobs = field(default_factory=Jobs)
-    needs: PropagatePhotosNeeded | PropagateVideoNeeded | PropagateEverythingNeeded | PropagateAudioNeeded = (
-        field(default_factory=PropagateEverythingNeeded)
+    needs: PropagatePhotosNeeded | PropagateVideoNeeded | PropagateEverythingNeeded | PropagateAudioNeeded = field(
+        default_factory=PropagateEverythingNeeded
     )
 
     video: BaseVideo = None

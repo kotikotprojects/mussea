@@ -3,6 +3,7 @@ from rich.traceback import Traceback
 
 from bot.utils.config import config
 
+from ..providers import NoProvidersLeft
 from ..providers.common.content import BasePhotos, BaseVideo
 from ..providers.common.propagations import (
     PropagateAudioNeeded,
@@ -11,7 +12,6 @@ from ..providers.common.propagations import (
     PropagateVideoNeeded,
 )
 from .cycle import LinkCycle
-from ..providers import NoProvidersLeft
 
 
 def __process_estimated(cycle: LinkCycle):

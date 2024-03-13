@@ -2,8 +2,8 @@ from dataclasses import dataclass
 
 from .common.providers import Provider
 from .contentstudio import contentstudio
-from .tiktokapi import tiktokapi
 from .estimator import estimator
+from .tiktokapi import tiktokapi
 
 
 class NoProvidersLeft(Exception):
