@@ -9,7 +9,7 @@ from ..common.exceptions import EndpointNotFound
 
 @define
 class ContentStudioEngine(CommonEngine):
-    async def get(self, url: str, json: dict = None):
+    async def get(self, url: str, json: dict = None, encoded: bool = False):
         try:
             async with self.session.post(
                 url, json=(json or {}), headers={"Content-Type": "application/json"}

@@ -1,5 +1,4 @@
 import re
-import urllib.parse
 from typing import Optional
 
 from attrs import define
@@ -22,35 +21,25 @@ REGEX_TIKTOK_URL = (
 @define
 class TikTokVideo(BaseVideo):
     @classmethod
-    async def from_aweme_json(cls, data: dict, driver: TikTokDriver):
-        urls = data["video"]["play_addr"]["url_list"]
-        for url in urls:
-            url = urllib.parse.urlparse(url)
-            url = f"{url.scheme}://{url.netloc}{url.path}"
-            if await driver.engine.check_exists(url):
-                return cls(url=url)
+    async def from_detail_json(cls, data: dict):
+        return cls(url=data["video"]["playAddr"])
 
 
 @define
 class TikTokPhotos(BasePhotos):
     @classmethod
-    async def from_aweme_json(cls, data: dict, driver: TikTokDriver):
+    async def from_detail_json(cls, data: dict, driver: TikTokDriver):
         ready_urls = list()
-        images = data["image_post_info"]["images"]
+        images = data["imagePost"]["images"]
         for image in images:
-            urls = image["display_image"]["url_list"]
-            for url in urls:
-                if await driver.engine.check_exists(url):
-                    ready_urls.append(url)
-                    break
+            ready_urls.append(image["imageURL"]["urlList"][0])
 
         try:
-            added_songs = data["added_sound_music_info"]["play_url"]["url_list"]
-            for song in added_songs:
-                if await driver.engine.check_exists(song):
-                    return cls(urls=ready_urls, audio_url=song)
-                else:
-                    raise TypeError
+            added_song = data["music"]["playUrl"]
+            if await driver.engine.check_exists(added_song):
+                return cls(urls=ready_urls, audio_url=added_song)
+            else:
+                raise TypeError
 
         except (TypeError, AttributeError, IndexError):
             return cls(urls=ready_urls, audio_url=None)
@@ -61,28 +50,18 @@ class Content:
     driver: TikTokDriver
 
     async def from_id(self, aweme_id: str) -> Optional[TikTokVideo | TikTokPhotos]:
-        r = await self.driver.get_aweme(aweme_id)
+        r = await self.driver.get_detail(aweme_id)
 
         if r is None:
             return None
 
-        try:
-            if r["content_type"] == "video":
-                return await TikTokVideo.from_aweme_json(r, self.driver)
-            elif "photo" in r["content_type"]:
-                return await TikTokPhotos.from_aweme_json(r, self.driver)
+        if r.get("imagePost"):
+            return await TikTokPhotos.from_detail_json(r, self.driver)
+        elif r.get("video"):
+            return await TikTokVideo.from_detail_json(r)
 
-            else:
-                return None
-
-        except KeyError:
-            if r.get("image_post_info"):
-                return await TikTokPhotos.from_aweme_json(r, self.driver)
-            elif r.get("video"):
-                return await TikTokVideo.from_aweme_json(r, self.driver)
-
-            else:
-                return None
+        else:
+            return None
 
     async def from_url(self, url: str) -> Optional[TikTokVideo | TikTokPhotos]:
         url_ = re.search(REGEX_TIKTOK_URL, url, re.IGNORECASE)

@@ -1,5 +1,6 @@
 import aiohttp
 from attrs import define
+from yarl import URL
 
 from bot.utils.config import config
 
@@ -60,10 +61,10 @@ class CommonEngine:
             await self.restart_session()
             return await self.read_data(url, params)
 
-    async def get(self, url: str, params: dict = None):
+    async def get(self, url: str, params: dict = None, encoded: bool = False):
         try:
             async with self.session.get(
-                url,
+                url if not encoded else URL(url, encoded=True),
                 params=(params or {}),
             ) as r:
                 if r.status != 200:

@@ -1,5 +1,6 @@
 from async_lru import alru_cache
 
+from ..common.engine import CommonEngine
 from ..common.propagations import (
     PropagateAudioNeeded,
     PropagateEverythingNeeded,
@@ -17,7 +18,8 @@ class Estimator(Provider):
     wants = "url"
 
     def __init__(self):
-        self.content = Content()
+        self.engine = CommonEngine()
+        self.content = Content(engine=self.engine)
 
     @alru_cache()
     async def from_url(

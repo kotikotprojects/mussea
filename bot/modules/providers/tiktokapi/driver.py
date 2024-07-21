@@ -1,48 +1,29 @@
-import asyncio
-from os import path
-
 from attrs import define
 
-from .engine import TikTokEngine
+from bot.utils.config import config
 
-ENDPOINTS = [
-    line.strip() for line in open(path.join(path.dirname(__file__), "endpoints"))
-]
-AWEME_APIS = [
-    "https://" + point + suffix
-    for point in ENDPOINTS
-    for suffix in ["/aweme/v1/feed/", "/aweme/v1/aweme/detail/"]
-]
+from .engine import TikTokEngine
 
 
 @define
 class TikTokDriver:
     engine: TikTokEngine
 
-    async def get_aweme(self, aweme_id: str):
-        tasks = [
-            asyncio.create_task(
-                self.engine.get(url=endpoint, params={"aweme_id": aweme_id})
+    async def get_detail(self, aweme_id: str):
+        new_url = (
+            await self.engine.post(
+                config.tiktokapi.signer_microservice_url,
+                data=f"https://www.tiktok.com/api/item/detail/"
+                f"?WebIdLastTime=0&aid=1988&app_language=ru-RU"
+                f"&app_name=tiktok_web&browser_language=ru-RU"
+                f"&browser_name=Mozilla&browser_platform=Win32"
+                f"&browser_version=5.0+(Windows)"
+                f"&device_id=000000000000000000"
+                f"&device_platform=web_pc"
+                f"&itemId={aweme_id}"
+                f"&os=windows&region=PL"
+                f"&screen_height=0&screen_width=0",
             )
-            for endpoint in AWEME_APIS
-        ]
-        while tasks:
-            done, pending = await asyncio.wait(
-                tasks, return_when=asyncio.FIRST_COMPLETED
-            )
+        )["data"]["signed_url"]
 
-            tasks = list(pending)
-
-            for task in done:
-                if task.exception():
-                    continue
-
-                try:
-                    data = await task
-                    if data.get("aweme_list", [{}])[0].get("aweme_id") == aweme_id:
-                        for remaining_task in tasks:
-                            remaining_task.cancel()
-                        return data["aweme_list"][0]
-
-                except Exception as e:
-                    assert e
+        return (await self.engine.get(new_url, encoded=True))["itemInfo"]["itemStruct"]

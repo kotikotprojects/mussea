@@ -12,7 +12,7 @@ class NoProvidersLeft(Exception):
 
 @dataclass
 class Providers:
-    __providers = [estimator, contentstudio, tiktokapi]
+    __providers = [estimator, tiktokapi, contentstudio]
     __current = -1
 
     def get_next(self) -> Provider:

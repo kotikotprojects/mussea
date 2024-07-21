@@ -1,11 +1,13 @@
 import aiohttp
 from attrs import define
 
+from bot.utils.config import config
+
 from ..common.engine import CommonEngine
+from ..common.exceptions import EndpointNotFound
 
 USER_AGENT = (
-    "com.ss.android.ugc.33.3.4/330304 (Linux; U; Android 13; en_US; Pixel 7; "
-    "Build/TD1A.220804.031; Cronet/58.0.2991.0)"
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
 )
 
 
@@ -20,3 +22,20 @@ class TikTokEngine(CommonEngine):
 
         finally:
             self.session = aiohttp.ClientSession(headers={"User-Agent": USER_AGENT})
+
+    async def post(self, url: str, data: str = ""):
+        try:
+            async with self.session.post(
+                url,
+                data=data,
+            ) as r:
+                if r.status != 200:
+                    raise EndpointNotFound(r.url)
+                if config.log.log_endpoints:
+                    print(r.url)
+
+                return await r.json()
+
+        except AttributeError:
+            await self.restart_session()
+            return await self.post(url, data)

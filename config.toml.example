@@ -1,6 +1,9 @@
 [telegram]
 bot_token = ''
 
+[tiktokapi]
+signer_microservice_url = "http://localhost:60103"
+
 [log]
 log_cycle_errors = true
 log_tiktoks = true
