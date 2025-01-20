@@ -1,0 +1,15 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./bot:/app/bot
+    command: "python3 -m bot"
+    env_file:
+      - .env
+
+  signer:
+    image: ghcr.io/kotikotprojects/mussea-signer:latest
+    environment:
+      - PORT=8080
