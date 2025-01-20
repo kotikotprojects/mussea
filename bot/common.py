@@ -1,9 +1,9 @@
 from aiogram import Bot, Dispatcher
 from rich.console import Console
 
-from .utils.config import config
+from .utils import config, env
 
-bot = Bot(token=config.telegram.bot_token)
+bot = Bot(token=env.BOT_TOKEN)
 dp = Dispatcher()
 console = Console()
 

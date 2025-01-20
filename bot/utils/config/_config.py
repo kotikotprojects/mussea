@@ -1,3 +1,5 @@
+import os
+import shutil
 import tomllib
 
 
@@ -5,6 +7,8 @@ class Config(dict):
     def __init__(self, _config: dict = None):
         try:
             if _config is None:
+                if not os.path.isfile("config.toml"):
+                    shutil.copy("config.toml.example", "config.toml")
                 super().__init__(**tomllib.load(open("config.toml", "rb")))
             else:
                 super().__init__(**_config)

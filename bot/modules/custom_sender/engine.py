@@ -1,7 +1,7 @@
 import aiohttp
 from attrs import define
 
-from bot.utils.config import config
+from bot.utils import env
 
 
 @define
@@ -26,7 +26,7 @@ class BotEngine:
     async def get_api(self, method: str, json: dict):
         try:
             async with self.session.post(
-                f"https://api.telegram.org/bot{config.telegram.bot_token}/{method}",
+                f"https://api.telegram.org/bot{env.BOT_TOKEN}/{method}",
                 json=json,
             ) as r:
                 return await r.json()

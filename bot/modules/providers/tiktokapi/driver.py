@@ -1,6 +1,6 @@
 from attrs import define
 
-from bot.utils.config import config
+from bot.utils import env
 
 from .engine import TikTokEngine
 
@@ -12,7 +12,7 @@ class TikTokDriver:
     async def get_detail(self, aweme_id: str):
         new_url = (
             await self.engine.post(
-                config.tiktokapi.signer_microservice_url,
+                env.SIGNER_MICROSERVICE_URL,
                 data=f"https://www.tiktok.com/api/item/detail/"
                 f"?WebIdLastTime=0&aid=1988&app_language=ru-RU"
                 f"&app_name=tiktok_web&browser_language=ru-RU"
