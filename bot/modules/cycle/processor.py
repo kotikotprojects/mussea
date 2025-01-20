@@ -37,9 +37,11 @@ def __process_estimated(cycle: LinkCycle):
         ]
     ):
         for x in cycle.can_propagate:
-            setattr(cycle, x, getattr(estimated, x)) if hasattr(
-                estimated, x
-            ) and getattr(estimated, x) else ...
+            (
+                setattr(cycle, x, getattr(estimated, x))
+                if hasattr(estimated, x) and getattr(estimated, x)
+                else ...
+            )
         cycle.needs = estimated
         cycle.job.set_estimate()
 
