@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./bot:/app/bot
+      - ./:/app/src
     command: "python3 -m bot"
     env_file:
       - .env
