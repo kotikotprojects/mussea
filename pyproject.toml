@@ -1,23 +1,17 @@
-[tool.poetry]
+[project]
 name = "mussea"
 version = "0.1.0"
 description = ""
-authors = ["hhh <h@localhost>"]
-readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.11"
-rich = "^13.7.1"
-aiogram = {extras = ["fast"], version = "^3.10.0"}
-aiohttp = "^3.9.5"
-attrs = "^23.2.0"
-orjson = "^3.10.6"
-async-lru = "^2.0.4"
+requires-python = ">=3.11"
+dependencies = [
+    "rich>=13.7.1,<14",
+    "aiogram[fast]>=3.10.0,<4",
+    "aiohttp>=3.9.5,<4",
+    "attrs>=23.2.0,<24",
+    "orjson>=3.10.6,<4",
+    "async-lru>=2.0.4,<3",
+    "python-dotenv>=1.0.1",
+]
 
 [tool.ruff]
 exclude = ["tests"]
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
